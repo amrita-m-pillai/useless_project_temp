@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>👏 Live Tap Counter 👏</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+  body {
+    margin: 0;
+    background: #121529; /* Darker, fantasy night sky blue */
+    font-family: 'Poppins', sans-serif;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    color: #66d1ff; /* softer bright blue */
+    text-shadow: 0 0 2px #66d1ff, 0 0 4px #66d1ff;
+  }
+
+  #count {
+    font-size: 7rem;
+    font-weight: 900;
+    color: #ff6f91; /* soft pinkish red */
+    text-shadow:
+      0 0 2.5px #ff6f91,
+      0 0 5px #ff6f91,
+      0 0 7.5px #ff6f91;
+    margin: 0;
+    animation: pulse 2.5s infinite;
+  }
+
+  #feedback {
+    margin-top: 1rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #f9f871; /* pale yellow */
+    text-shadow: 0 0 2px #f9f871;
+    min-height: 48px;
+  }
+
+  #moodStatement {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffcc00;
+    min-height: 36px;
+  }
+
+  #videoContainer {
+    margin-top: 1.5rem;
+    width: 320px;
+    height: 180px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 15px #66d1ff80;
+    background: #222;
+  }
+  #videoContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      text-shadow:
+        0 0 2.5px #ff6f91,
+        0 0 5px #ff6f91,
+        0 0 7.5px #ff6f91;
+      transform: scale(1);
+    }
+    50% {
+      text-shadow:
+        0 0 5px #ffa3b1,
+        0 0 7.5px #ffa3b1,
+        0 0 10px #ffa3b1;
+      transform: scale(1.05);
+    }
+  }
+
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    animation: floatUp 25s linear infinite;
+  }
+  .circle1 {
+    width: 150px;
+    height: 150px;
+    left: 10%;
+    bottom: -200px;
+    animation-delay: 0s;
+    background: rgba(102, 209, 255, 0.05);
+  }
+  .circle2 {
+    width: 100px;
+    height: 100px;
+    left: 70%;
+    bottom: -150px;
+    animation-delay: 8s;
+    background: rgba(255, 111, 145, 0.05);
+  }
+  .circle3 {
+    width: 200px;
+    height: 200px;
+    left: 40%;
+    bottom: -250px;
+    animation-delay: 15s;
+    background: rgba(249, 248, 113, 0.05);
+  }
+
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 0.05;
+    }
+    50% {
+      opacity: 0.1;
+    }
+    100% {
+      transform: translateY(-110vh) scale(1.1);
+      opacity: 0;
+    }
+  }
+
+  #stars {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: twinkle linear infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% {opacity: 0.2;}
+    50% {opacity: 0.8;}
+  }
+
+  /* Reset button style */
+  #reset-btn {
+    margin-top: 2rem;
+    background-color: #66d1ff;
+    border: none;
+    color: #121529;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #66d1ff80;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+  }
+  #reset-btn:hover {
+    background-color: #44aacc;
+    box-shadow: 0 0 15px #44aacc;
+  }
+</style>
+</head>
+<body>
+
+<h1>👏 Mood Measure 👏</h1>
+<div id="count">0</div>
+<div id="feedback">Waiting for taps...</div>
+<div id="moodStatement"></div>
+<div id="videoContainer"></div>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+<div class="circle circle3"></div>
+
+<div id="stars"></div>
+
+<button id="reset-btn">Reset Taps</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: "YOUR_DATABASE_URL",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Mood data for count 1 to 11
+  const moodData = {
+    1: { img: "D:/Tap_detection/Img1.jpg", mood: "Feeling very sad... 😢 Why did mommy scold youuuu ?!😣" },
+    2: { img: "D:/Tap_detection/Img2.jpg", mood: "Still a bit down... 😞 Existential crisis🥲" },
+    3: { img: "D:/Tap_detection/Img3.png", mood: "Keep your head up! 🌧️ Breakup vellom aayo aliyaaaaaaa💔" },
+    4: { img: "D:/Tap_detection/Img4.jpg", mood: "Hope things get better... 🌧️Enn parayaane namak pattooooo" },
+
+    5: { img: "D:/Tap_detection/Img5.jpg", mood: "Feeling good! 😊 Mandi kazhichaalooo???🍗" },
+    6: { img: "D:/Tap_detection/Img6.jpg", mood: "Keep shining! ☀️ Someone seems to be in a good mood " },
+    7: { img: "D:/Tap_detection/Img7.jpg", mood: "Happy vibes! 😄 Korach aanandaasharam edukkatte " },
+
+    8: { img: "D:/Tap_detection/Img8.jpg", mood: "Getting a bit annoyed... 😠 Its not Leviosa, it's Levio-sa! " },
+    9: { img: "D:/Tap_detection/Img9.jpg", mood: "Anger rising! 😡 When the calm breaks, chaos wakes" },
+    10: { img: "D:/Tap_detection/Img10.jpg", mood: "Full angry mode! 🔥Thats it! No more Mr. Nice Anger" },
+    11: { img: "D:/Tap_detection/Img11.jpg", mood: "Calm down! 😤 Hulk smash!" }
+  };
+
+  const psychoImage = "D:/Tap_detection/Img12.png";
+  const psychoMood = "Psycho Mode Activated! 🤪 Oru murai vandh paarayoooo";
+
+  const countElem = document.getElementById("count");
+  const feedbackElem = document.getElementById("feedback");
+  const moodElem = document.getElementById("moodStatement");
+  const videoContainer = document.getElementById("videoContainer");
+  const resetBtn = document.getElementById("reset-btn");
+
+  function showMood(count) {
+    if (countData = moodData[count]) {
+      moodElem.textContent = countData.mood;
+      videoContainer.innerHTML = `<img src="${countData.img}" alt="Mood Image" />`;
+    } else if (count > 11) {
+      moodElem.textContent = psychoMood;
+      videoContainer.innerHTML = `<img src="${psychoImage}" alt="Psycho Mood Image" />`;
+    } else {
+      moodElem.textContent = "";
+      videoContainer.innerHTML = "";
+    }
+  }
+
+  db.ref('clap').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.count !== undefined) {
+      const count = data.count;
+      countElem.textContent = count;
+
+      if (count >= 1) {
+        feedbackElem.textContent = "";
+        showMood(count);
+      } else {
+        feedbackElem.textContent = "Keep tapping!";
+        moodElem.textContent = "";
+        videoContainer.innerHTML = "";
+      }
+    } else {
+      countElem.textContent = 0;
+      feedbackElem.textContent = "Waiting for taps...";
+      moodElem.textContent = "";
+      videoContainer.innerHTML = "";
+    }
+  });
+
+  resetBtn.onclick = () => {
+    db.ref('clap').set({ count: 0, timestamp: new Date().toISOString() });
+  };
+
+  // Generate sparkling stars
+  const starsContainer = document.getElementById('stars');
+  const starCount = 150;
+
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement('div');
+    star.classList.add('star');
+    const size = Math.random() * 2 + 0.5; // 0.5 to 2.5 px
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    star.style.top = `${Math.random() * 100}vh`;
+    star.style.left = `${Math.random() * 100}vw`;
+
+    star.style.animationDuration = (1.5 + Math.random() * 3) + 's';
+    star.style.animationDelay = (Math.random() * 4) + 's';
+
+    const colorValue = 200 + Math.floor(Math.random() * 56);
+    star.style.backgroundColor = `rgb(${colorValue}, ${colorValue}, 255)`;
+
+    starsContainer.appendChild(star);
+  }
+</script>
+
+</body>
+</html>
