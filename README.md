@@ -1,24 +1,21 @@
 <img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# [Project Name] 🎯
+# Mood Measure with Taps 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: Binary Beats
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: Amrita M Pillai- College of Engineering Trivandrum
+- Member 2:Neha J Shibu- College of Engineering Trivandrum
 
 ### Project Description
-[2-3 lines about what your project does]
-
+Who really needs a tap counter? We’re counting taps on purpose just because… why not? Life’s too short not to measure finger speed and mood swings simultaneously!
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
-
+A live tap counter that not only counts your taps but also shows your mood through cool images — from sad to psycho mode — all synced realtime with Firebase. Because your finger’s emotional state deserves some spotlight!
 ### The Solution (that nobody asked for)
 [How are you solving it? Keep it fun!]
 
